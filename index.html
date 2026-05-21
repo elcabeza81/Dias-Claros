@@ -123,7 +123,7 @@ button { cursor: pointer; }
 }
 
 .summary {
-  margin-bottom: 12px;
+  margin-bottom: 10px;
 }
 
 .today-card {
@@ -138,6 +138,7 @@ button { cursor: pointer; }
   grid-template-columns: auto 1fr;
   align-items: end;
   gap: 10px 24px;
+  min-height: 126px;
 }
 
 .label {
@@ -150,7 +151,7 @@ button { cursor: pointer; }
 }
 
 .today-owner {
-  font-size: clamp(48px, 6vw, 72px);
+  font-size: clamp(46px, 5.2vw, 70px);
   font-weight: 950;
   line-height: .95;
 }
@@ -160,7 +161,7 @@ button { cursor: pointer; }
 
 .next-line {
   color: var(--text);
-  font-size: clamp(18px, 2vw, 28px);
+  font-size: clamp(18px, 1.8vw, 26px);
   font-weight: 800;
   line-height: 1.35;
   margin: 0 0 3px;
@@ -235,12 +236,13 @@ button { cursor: pointer; }
   grid-template-columns: 66px 1fr 66px;
   align-items: center;
   gap: 12px;
-  padding: 14px;
+  padding: 12px 14px;
+  flex: 0 0 auto;
 }
 
 .month-title {
   text-align: center;
-  font-size: 28px;
+  font-size: 26px;
   font-weight: 950;
   text-transform: capitalize;
 }
@@ -290,10 +292,11 @@ button { cursor: pointer; }
   font-weight: 900;
   text-align: center;
   text-transform: uppercase;
+  flex: 0 0 auto;
 }
 
 .days div {
-  padding: 12px 4px;
+  padding: 10px 4px;
 }
 
 .week {
@@ -313,10 +316,11 @@ button { cursor: pointer; }
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: flex-start;
-  gap: 8px;
-  padding: 11px 6px 8px;
+  justify-content: center;
+  gap: 5px;
+  padding: 7px 6px;
   position: relative;
+  overflow: hidden;
 }
 
 @media (min-width: 761px) {
@@ -344,18 +348,20 @@ button { cursor: pointer; }
 }
 
 .date-num {
-  font-size: 18px;
-  font-weight: 950;
-  line-height: 1;
-}
-
-.owner-badge {
-  min-width: 28px;
-  border-radius: 6px;
-  padding: 4px 8px;
   font-size: 16px;
   font-weight: 950;
   line-height: 1;
+  flex: 0 0 auto;
+}
+
+.owner-badge {
+  min-width: 26px;
+  border-radius: 6px;
+  padding: 4px 7px;
+  font-size: 14px;
+  font-weight: 950;
+  line-height: 1;
+  flex: 0 0 auto;
 }
 
 .owner-badge.papa {
@@ -369,10 +375,22 @@ button { cursor: pointer; }
 }
 
 .owner-name {
+  display: none;
   font-size: 12px;
   font-weight: 950;
   letter-spacing: .04em;
   text-transform: uppercase;
+  line-height: 1;
+  flex: 0 0 auto;
+}
+
+@media (min-width: 761px) and (min-height: 980px) {
+  .owner-name { display: block; }
+}
+
+@media (min-width: 1280px) and (min-height: 1040px) {
+  .date-num { font-size: 18px; }
+  .owner-badge { font-size: 16px; min-width: 28px; padding: 4px 8px; }
 }
 
 .owner-name.papa { color: var(--papa); }
@@ -380,10 +398,11 @@ button { cursor: pointer; }
 
 .hint {
   color: var(--muted);
-  font-size: 14px;
+  font-size: 13px;
   text-align: center;
-  padding: 13px 12px;
+  padding: 10px 12px;
   border-top: 1px solid var(--line);
+  flex: 0 0 auto;
 }
 
 .legend {
@@ -391,7 +410,8 @@ button { cursor: pointer; }
   align-items: center;
   gap: 20px;
   border-top: 1px solid var(--line);
-  padding: 12px 16px;
+  padding: 10px 16px;
+  flex: 0 0 auto;
 }
 
 .legend-item {
@@ -415,7 +435,7 @@ button { cursor: pointer; }
 .legend-item.today { color: var(--gold); margin-left: auto; }
 
 .history-section {
-  margin-top: 10px;
+  margin-top: 8px;
   border: 1px solid var(--line);
   border-radius: 12px;
   background: var(--panel);
@@ -423,7 +443,7 @@ button { cursor: pointer; }
 }
 
 .history-section summary {
-  min-height: 44px;
+  min-height: 40px;
   display: flex;
   align-items: center;
   padding: 0 14px;
@@ -528,7 +548,7 @@ button { cursor: pointer; }
   }
   .date-num { font-size: 14px; }
   .owner-badge { font-size: 12px; min-width: 24px; padding: 4px 7px; }
-  .owner-name { font-size: 10px; letter-spacing: 0; }
+  .owner-name { display: block; font-size: 10px; letter-spacing: 0; }
   .legend { gap: 12px; padding: 11px 12px; }
   .legend-item { font-size: 12px; }
 }
