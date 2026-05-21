@@ -40,6 +40,15 @@ button { cursor: pointer; }
   padding: 0 12px 22px;
 }
 
+@media (min-width: 761px) {
+  body { overflow: hidden; }
+  .app {
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+}
+
 .topbar {
   min-height: 82px;
   display: flex;
@@ -114,17 +123,21 @@ button { cursor: pointer; }
 }
 
 .summary {
-  display: grid;
-  grid-template-columns: minmax(280px, 420px) 1fr;
-  gap: 12px;
   margin-bottom: 12px;
 }
 
-.today-card, .history-card {
+.today-card {
   background: var(--panel);
   border: 1px solid var(--line);
   border-radius: 14px;
   padding: 16px;
+}
+
+.today-card {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: end;
+  gap: 10px 24px;
 }
 
 .label {
@@ -147,10 +160,10 @@ button { cursor: pointer; }
 
 .next-line {
   color: var(--text);
-  font-size: 18px;
+  font-size: clamp(18px, 2vw, 28px);
   font-weight: 800;
   line-height: 1.35;
-  margin-top: 12px;
+  margin: 0 0 3px;
 }
 
 .next-line em {
@@ -158,8 +171,12 @@ button { cursor: pointer; }
   font-style: normal;
 }
 
-.history-card {
-  min-height: 160px;
+.change-line {
+  color: var(--muted);
+  font-size: 14px;
+  font-weight: 800;
+  line-height: 1.35;
+  margin-top: 7px;
 }
 
 .history-list {
@@ -203,6 +220,16 @@ button { cursor: pointer; }
   overflow: hidden;
 }
 
+@media (min-width: 761px) {
+  .summary { flex: 0 0 auto; }
+  .calendar-shell {
+    flex: 1 1 auto;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+  }
+}
+
 .calendar-head {
   display: grid;
   grid-template-columns: 66px 1fr 66px;
@@ -228,6 +255,27 @@ button { cursor: pointer; }
 
 .calendar {
   border-top: 1px solid var(--line);
+}
+
+@media (min-width: 761px) {
+  .calendar {
+    flex: 1 1 auto;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+  }
+
+  #calendarBody {
+    flex: 1 1 auto;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .week {
+    flex: 1 1 0;
+    min-height: 0;
+  }
 }
 
 .days, .week {
@@ -269,6 +317,13 @@ button { cursor: pointer; }
   gap: 8px;
   padding: 11px 6px 8px;
   position: relative;
+}
+
+@media (min-width: 761px) {
+  .day {
+    min-height: 0;
+    justify-content: center;
+  }
 }
 
 .day:nth-child(7) { border-right: 0; }
@@ -359,6 +414,32 @@ button { cursor: pointer; }
 .legend-item.mama { color: var(--mama); }
 .legend-item.today { color: var(--gold); margin-left: auto; }
 
+.history-section {
+  margin-top: 10px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--panel);
+  overflow: hidden;
+}
+
+.history-section summary {
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  padding: 0 14px;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.history-section .history-list {
+  max-height: 220px;
+  padding: 0 14px 14px;
+}
+
 .modal {
   display: none;
   position: fixed;
@@ -428,7 +509,11 @@ button { cursor: pointer; }
   .actions { gap: 8px; }
   .primary-btn { padding: 0 12px; }
   .summary { grid-template-columns: 1fr; }
-  .history-card { min-height: auto; }
+  .today-card {
+    grid-template-columns: 1fr;
+    align-items: start;
+  }
+  .next-line { margin-top: 0; }
   .calendar-head {
     grid-template-columns: 52px 1fr 52px;
     padding: 10px;
@@ -472,13 +557,14 @@ button { cursor: pointer; }
 
   <section class="summary">
     <div class="today-card">
-      <div class="label">Hoy están con</div>
-      <div id="todayOwner" class="today-owner">...</div>
-      <div id="nextLine" class="next-line"></div>
-    </div>
-    <div class="history-card">
-      <div class="label">Últimos cambios</div>
-      <div id="historyList" class="history-list"></div>
+      <div>
+        <div class="label">Hoy están con</div>
+        <div id="todayOwner" class="today-owner">...</div>
+      </div>
+      <div>
+        <div id="nextLine" class="next-line"></div>
+        <div id="changeLine" class="change-line"></div>
+      </div>
     </div>
   </section>
 
@@ -501,6 +587,11 @@ button { cursor: pointer; }
       <div class="legend-item today"><span class="legend-dot"></span>Hoy</div>
     </div>
   </section>
+
+  <details class="history-section">
+    <summary>Historial de cambios</summary>
+    <div id="historyList" class="history-list"></div>
+  </details>
 </main>
 
 <div id="changeModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="changeTitle">
@@ -650,9 +741,18 @@ function loadRemoteState() {
 }
 
 function normalizeState(remote) {
+  var defaults = fallbackState();
+  var remoteFamily = remote.family || {};
   return {
     currentRole: remote.currentRole || state.currentRole || 'este dispositivo',
-    family: remote.family || state.family,
+    family: {
+      id: remoteFamily.id || (state.family && state.family.id) || defaults.family.id,
+      name: remoteFamily.name || (state.family && state.family.name) || defaults.family.name,
+      papaName: normalizeOwnerName(remoteFamily.papaName || (state.family && state.family.papaName) || defaults.family.papaName, 'papa'),
+      mamaName: normalizeOwnerName(remoteFamily.mamaName || (state.family && state.family.mamaName) || defaults.family.mamaName, 'mama'),
+      cycleStart: normalizeCycleStart(remoteFamily.cycleStart || (state.family && state.family.cycleStart) || defaults.family.cycleStart),
+      cycle: Array.isArray(remoteFamily.cycle) && remoteFamily.cycle.length ? remoteFamily.cycle : ((state.family && state.family.cycle) || defaults.family.cycle)
+    },
     overrides: remote.overrides || {},
     history: remote.history || []
   };
@@ -662,28 +762,62 @@ function pad2(n) { return n < 10 ? '0' + n : '' + n; }
 function dateKey(d) { return d.getFullYear() + '-' + pad2(d.getMonth() + 1) + '-' + pad2(d.getDate()); }
 
 function labelOwner(who) {
-  if (who === 'papa') return (state.family && state.family.papaName) || 'Papá';
-  return (state.family && state.family.mamaName) || 'Mamá';
+  if (who === 'papa') return normalizeOwnerName(state.family && state.family.papaName, 'papa');
+  if (who === 'mama') return normalizeOwnerName(state.family && state.family.mamaName, 'mama');
+  return '';
 }
 
 function shortOwner(who) {
-  return who === 'papa' ? 'P' : 'M';
+  if (who === 'papa') return 'P';
+  if (who === 'mama') return 'M';
+  return '';
 }
 
 function ownerTextClass(who) {
-  return who === 'papa' ? 'owner-papa' : 'owner-mama';
+  if (who === 'papa') return 'owner-papa';
+  if (who === 'mama') return 'owner-mama';
+  return '';
 }
 
 function ownerBgClass(who) {
-  return who === 'papa' ? 'owner-papa-bg' : 'owner-mama-bg';
+  if (who === 'papa') return 'owner-papa-bg';
+  if (who === 'mama') return 'owner-mama-bg';
+  return '';
+}
+
+function normalizeOwnerName(name, fallback) {
+  var raw = String(name || '').trim();
+  if (!raw && fallback === 'papa') return 'Papá';
+  if (!raw && fallback === 'mama') return 'Mamá';
+  var plain = raw.toLowerCase();
+  if (plain === 'papa') return 'Papá';
+  if (plain === 'mama') return 'Mamá';
+  return raw;
+}
+
+function normalizeCycleStart(raw) {
+  var t = parseDateToTime(raw);
+  if (!isNaN(t)) {
+    var d = new Date(t);
+    return d.getFullYear() + '-' + pad2(d.getMonth() + 1) + '-' + pad2(d.getDate());
+  }
+  return '2026-05-08';
+}
+
+function parseDateToTime(raw) {
+  if (!raw) return NaN;
+  if (Object.prototype.toString.call(raw) === '[object Date]') return raw.getTime();
+  var s = String(raw).trim();
+  var m = s.match(/^(\d{4})-(\d{2})-(\d{2})/);
+  if (m) return new Date(+m[1], +m[2] - 1, +m[3]).getTime();
+  var parsed = new Date(s).getTime();
+  return parsed;
 }
 
 function getCycleStartTime() {
   var raw = state.family && state.family.cycleStart;
-  if (!raw) return CYCLE_START;
-  var parts = String(raw).split('-');
-  if (parts.length !== 3) return CYCLE_START;
-  return new Date(+parts[0], +parts[1] - 1, +parts[2]).getTime();
+  var parsed = parseDateToTime(raw);
+  return isNaN(parsed) ? CYCLE_START : parsed;
 }
 
 function getCycle() {
@@ -697,8 +831,8 @@ function getBaseOwner(ds) {
   var parts = ds.split('-');
   var d = new Date(+parts[0], +parts[1] - 1, +parts[2]);
   var diff = Math.round((d.getTime() - cycleStart) / 86400000);
-  if (diff < 0) return null;
-  return cycle[((diff % cycle.length) + cycle.length) % cycle.length];
+  if (isNaN(diff)) return null;
+  return cycle[((diff % cycle.length) + cycle.length) % cycle.length] || null;
 }
 
 function getOwner(ds) {
@@ -733,6 +867,17 @@ function renderSummary() {
     line.innerHTML = 'Próximo cambio: ' + when + ' con <em>' + labelOwner(next.owner) + '</em>.';
   } else {
     line.textContent = 'No hay cambios próximos cargados.';
+  }
+
+  var changeLine = document.getElementById('changeLine');
+  var history = state.history || [];
+  if (changeLine) {
+    if (history.length) {
+      var last = history[history.length - 1];
+      changeLine.textContent = 'Último registro: ' + formatDate(last.date) + '.';
+    } else {
+      changeLine.textContent = '';
+    }
   }
 }
 
