@@ -225,8 +225,13 @@ button { cursor: pointer; }
   grid-template-columns: 66px 1fr 66px;
   align-items: center;
   gap: 12px;
-  padding: 10px 14px;
+  padding: 10px 14px 8px;
   flex: 0 0 auto;
+}
+
+.calendar-titleblock {
+  min-width: 0;
+  text-align: center;
 }
 
 .month-title {
@@ -378,41 +383,39 @@ button { cursor: pointer; }
 
 .hint {
   color: var(--muted);
-  font-size: 13px;
+  font-size: 12px;
   text-align: center;
-  padding: 10px 12px;
-  border-top: 1px solid var(--line);
-  flex: 0 0 auto;
+  line-height: 1.3;
+  margin-top: 5px;
 }
 
 .legend {
   display: flex;
   align-items: center;
-  gap: 20px;
-  border-top: 1px solid var(--line);
-  padding: 10px 16px;
-  flex: 0 0 auto;
+  justify-content: center;
+  gap: 14px;
+  margin-top: 7px;
 }
 
 .legend-item {
   display: inline-flex;
   align-items: center;
-  gap: 7px;
+  gap: 6px;
   color: var(--text);
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 900;
 }
 
 .legend-dot {
-  width: 15px;
-  height: 15px;
+  width: 13px;
+  height: 13px;
   border-radius: 4px;
   border: 2px solid currentColor;
 }
 
 .legend-item.papa { color: var(--papa); }
 .legend-item.mama { color: var(--mama); }
-.legend-item.today { color: var(--gold); margin-left: auto; }
+.legend-item.today { color: var(--gold); }
 
 .history-section {
   margin-top: 8px;
@@ -534,7 +537,7 @@ button { cursor: pointer; }
   .date-num { font-size: 14px; }
   .owner-badge { font-size: 12px; min-width: 24px; padding: 4px 7px; }
   .owner-name { display: block; font-size: 10px; letter-spacing: 0; }
-  .legend { gap: 12px; padding: 11px 12px; }
+  .legend { gap: 10px; flex-wrap: wrap; }
   .legend-item { font-size: 12px; }
 }
 
@@ -570,7 +573,15 @@ button { cursor: pointer; }
   <section class="calendar-shell">
     <div class="calendar-head">
       <button class="icon-btn" aria-label="Mes anterior" onclick="moveMonth(-1)">←</button>
-      <div id="monthTitle" class="month-title">Mes</div>
+      <div class="calendar-titleblock">
+        <div id="monthTitle" class="month-title">Mes</div>
+        <div class="hint">Tocá la P o M para cambiar el turno. El cambio queda asentado en el historial.</div>
+        <div class="legend">
+          <div class="legend-item papa"><span class="legend-dot"></span>Papá</div>
+          <div class="legend-item mama"><span class="legend-dot"></span>Mamá</div>
+          <div class="legend-item today"><span class="legend-dot"></span>Hoy</div>
+        </div>
+      </div>
       <button class="icon-btn" aria-label="Mes siguiente" onclick="moveMonth(1)">→</button>
     </div>
     <div class="calendar">
@@ -578,12 +589,6 @@ button { cursor: pointer; }
         <div>Lun</div><div>Mar</div><div>Mié</div><div>Jue</div><div>Vie</div><div>Sáb</div><div>Dom</div>
       </div>
       <div id="calendarBody"></div>
-    </div>
-    <div class="hint">Tocá la P o M para cambiar el turno al instante. El cambio queda asentado en el historial.</div>
-    <div class="legend">
-      <div class="legend-item papa"><span class="legend-dot"></span>Papá</div>
-      <div class="legend-item mama"><span class="legend-dot"></span>Mamá</div>
-      <div class="legend-item today"><span class="legend-dot"></span>Hoy</div>
     </div>
   </section>
 
