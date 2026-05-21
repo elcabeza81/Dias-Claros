@@ -1,0 +1,872 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dias Claros - MVP</title>
+<style>
+:root {
+  --bg: #f7f5f0;
+  --surface: #ffffff;
+  --surface-soft: #f0ede6;
+  --text: #202124;
+  --muted: #697078;
+  --line: #ddd8cf;
+  --papa: #3778bf;
+  --papa-soft: #dfeefa;
+  --mama: #5f9f7a;
+  --mama-soft: #e2f1e8;
+  --pending: #b97821;
+  --pending-soft: #fff1d8;
+  --today: #2f3a44;
+  --danger: #a9433b;
+}
+
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  min-height: 100vh;
+}
+
+button, input, select, textarea { font: inherit; }
+button { cursor: pointer; }
+
+.app {
+  width: min(100%, 520px);
+  margin: 0 auto;
+  min-height: 100vh;
+  padding: 16px 14px 28px;
+}
+
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.brand {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.brand strong {
+  font-size: 20px;
+  line-height: 1.05;
+}
+
+.brand span {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.primary-btn, .secondary-btn, .ghost-btn {
+  min-height: 44px;
+  border-radius: 8px;
+  border: 1px solid transparent;
+  padding: 0 14px;
+  font-weight: 750;
+}
+
+.primary-btn {
+  background: var(--today);
+  color: #fff;
+}
+
+.secondary-btn {
+  background: var(--surface);
+  border-color: var(--line);
+  color: var(--text);
+}
+
+.ghost-btn {
+  background: transparent;
+  border-color: var(--line);
+  color: var(--muted);
+}
+
+.hero {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 12px;
+}
+
+.eyebrow {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+
+.today-owner {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.today-owner h1 {
+  margin: 0;
+  font-size: 42px;
+  line-height: 1;
+  letter-spacing: 0;
+}
+
+.today-owner .pill {
+  flex: 0 0 auto;
+}
+
+.next-line {
+  margin-top: 12px;
+  color: var(--muted);
+  font-size: 15px;
+  line-height: 1.35;
+}
+
+.quick-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.quick {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 12px 10px;
+  min-height: 76px;
+}
+
+.quick span {
+  color: var(--muted);
+  display: block;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: .03em;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+
+.quick strong {
+  font-size: 16px;
+  line-height: 1.18;
+}
+
+.section {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  margin-bottom: 12px;
+  overflow: hidden;
+}
+
+.section-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px;
+  border-bottom: 1px solid var(--line);
+}
+
+.section-title {
+  font-size: 14px;
+  font-weight: 850;
+}
+
+.month-nav {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.icon-btn {
+  width: 42px;
+  height: 42px;
+  border-radius: 8px;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  color: var(--text);
+  font-size: 20px;
+  line-height: 1;
+}
+
+.calendar {
+  padding: 10px;
+}
+
+.days, .week {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 4px;
+}
+
+.days {
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 800;
+  margin-bottom: 6px;
+  text-align: center;
+}
+
+.day {
+  min-height: 62px;
+  border-radius: 8px;
+  padding: 6px 4px;
+  background: var(--surface-soft);
+  border: 1px solid transparent;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 4px;
+}
+
+.day.empty {
+  opacity: 0;
+}
+
+.day.today {
+  border-color: var(--today);
+  box-shadow: inset 0 0 0 1px var(--today);
+}
+
+.date-num {
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.owner-chip {
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 850;
+  padding: 4px 3px;
+  text-align: center;
+}
+
+.papa {
+  background: var(--papa-soft);
+  color: var(--papa);
+}
+
+.mama {
+  background: var(--mama-soft);
+  color: var(--mama);
+}
+
+.owner-papa {
+  color: var(--papa);
+}
+
+.owner-mama {
+  color: var(--mama);
+}
+
+.pending {
+  background: var(--pending-soft);
+  color: var(--pending);
+}
+
+.pill {
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 30px;
+  padding: 0 10px;
+  font-size: 12px;
+  font-weight: 850;
+}
+
+.list {
+  padding: 4px 12px 12px;
+}
+
+.change-row {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 12px;
+  margin-top: 8px;
+  background: #fff;
+}
+
+.change-row strong {
+  display: block;
+  font-size: 14px;
+  margin-bottom: 4px;
+}
+
+.change-row span {
+  color: var(--muted);
+  display: block;
+  font-size: 13px;
+  line-height: 1.35;
+}
+
+.change-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.empty {
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.4;
+  padding: 14px 12px;
+}
+
+.modal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(32, 33, 36, .42);
+  padding: 18px;
+  align-items: flex-end;
+  justify-content: center;
+}
+
+.modal.open { display: flex; }
+
+.dialog {
+  width: min(100%, 480px);
+  background: var(--surface);
+  border-radius: 10px;
+  padding: 16px;
+  box-shadow: 0 18px 50px rgba(0,0,0,.22);
+}
+
+.dialog h2 {
+  font-size: 20px;
+  margin: 0 0 12px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+
+.field label {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: .03em;
+  text-transform: uppercase;
+}
+
+.field input, .field select, .field textarea {
+  width: 100%;
+  min-height: 44px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 10px;
+  background: #fff;
+  color: var(--text);
+}
+
+.field textarea {
+  resize: vertical;
+  min-height: 80px;
+}
+
+.dialog-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+@media (max-width: 390px) {
+  .app { padding-left: 10px; padding-right: 10px; }
+  .today-owner h1 { font-size: 34px; }
+  .quick-grid { grid-template-columns: 1fr; }
+  .day { min-height: 54px; padding: 5px 2px; }
+  .owner-chip { font-size: 10px; }
+}
+</style>
+</head>
+<body>
+<main class="app">
+  <header class="topbar">
+    <div class="brand">
+      <strong>Dias Claros</strong>
+      <span id="familyName">Acuerdos visuales para padres separados</span>
+    </div>
+    <button class="primary-btn" onclick="openChangeModal()">+ Cambio</button>
+  </header>
+
+  <section class="hero">
+    <div class="eyebrow">Hoy</div>
+    <div class="today-owner">
+      <h1 id="todayOwner">...</h1>
+      <span id="todayPill" class="pill">Confirmado</span>
+    </div>
+    <div id="nextLine" class="next-line"></div>
+  </section>
+
+  <section class="quick-grid" aria-label="Resumen">
+    <div class="quick">
+      <span>Manana</span>
+      <strong id="tomorrowOwner">...</strong>
+    </div>
+    <div class="quick">
+      <span>Proximo cambio</span>
+      <strong id="nextChange">...</strong>
+    </div>
+    <div class="quick">
+      <span>Pendientes</span>
+      <strong id="pendingCount">0</strong>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="section-head">
+      <button class="icon-btn" aria-label="Mes anterior" onclick="moveMonth(-1)">‹</button>
+      <div class="section-title" id="monthTitle">Mes</div>
+      <button class="icon-btn" aria-label="Mes siguiente" onclick="moveMonth(1)">›</button>
+    </div>
+    <div class="calendar">
+      <div class="days">
+        <div>Lun</div><div>Mar</div><div>Mie</div><div>Jue</div><div>Vie</div><div>Sab</div><div>Dom</div>
+      </div>
+      <div id="calendarBody"></div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="section-head">
+      <div class="section-title">Cambios pendientes</div>
+      <span id="syncState" class="pill">Demo local</span>
+    </div>
+    <div class="list" id="pendingList"></div>
+  </section>
+
+  <section class="section">
+    <div class="section-head">
+      <div class="section-title">Historial simple</div>
+    </div>
+    <div class="list" id="historyList"></div>
+  </section>
+</main>
+
+<div id="changeModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="changeTitle">
+  <form class="dialog" onsubmit="createChange(event)">
+    <h2 id="changeTitle">Proponer cambio</h2>
+    <div class="field">
+      <label for="changeDate">Dia</label>
+      <input id="changeDate" type="date" required>
+    </div>
+    <div class="field">
+      <label for="changeOwner">Ese dia quedaria con</label>
+      <select id="changeOwner" required>
+        <option value="papa">Papa</option>
+        <option value="mama">Mama</option>
+      </select>
+    </div>
+    <div class="field">
+      <label for="changeNote">Nota breve opcional</label>
+      <textarea id="changeNote" maxlength="180" placeholder="Ej: feriado, viaje, acto escolar..."></textarea>
+    </div>
+    <div class="dialog-actions">
+      <button class="ghost-btn" type="button" onclick="closeChangeModal()">Cancelar</button>
+      <button class="primary-btn" type="submit">Enviar propuesta</button>
+    </div>
+  </form>
+</div>
+
+<script>
+// Pegar aca la URL del Apps Script comercial cuando este publicado.
+// Mientras quede en PEGAR_URL_APPS_SCRIPT, la app funciona como demo local con localStorage.
+var API_URL = 'https://script.google.com/macros/s/AKfycbwEbNnyGulUcjH3n7ELbzJ1GKsV5iqa2iXqwkmx7PoZpNLp_SAzsXtAyq-iXexo3Ys_6A/exec';
+var USE_API = API_URL.indexOf('PEGAR_URL') === -1;
+
+var MONTHS = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+var DAYS = ['Domingo','Lunes','Martes','Miercoles','Jueves','Viernes','Sabado'];
+var CYCLE_START = new Date(2026, 4, 8).getTime();
+var CYCLE = ['mama','mama','mama','papa','papa','mama','mama','papa','papa','papa','mama','mama','papa','papa'];
+var ACCESS = getAccessFromUrl();
+var state = loadState();
+var now = new Date();
+var calYear = now.getFullYear();
+var calMonth = now.getMonth();
+
+function loadState() {
+  var fallback = {
+    family: { id: ACCESS.family || 'demo', name: 'Familia demo', papaName: 'Papa', mamaName: 'Mama' },
+    overrides: {},
+    requests: [],
+    history: []
+  };
+  try {
+    return JSON.parse(localStorage.getItem('dias_claros_mvp')) || fallback;
+  } catch (e) {
+    return fallback;
+  }
+}
+
+function saveState() {
+  localStorage.setItem('dias_claros_mvp', JSON.stringify(state));
+}
+
+function getAccessFromUrl() {
+  var params = new URLSearchParams(window.location.search);
+  return {
+    family: params.get('family') || '',
+    token: params.get('token') || ''
+  };
+}
+
+function canUseRemote() {
+  return USE_API && ACCESS.family && ACCESS.token;
+}
+
+function setSync(text, mode) {
+  var el = document.getElementById('syncState');
+  if (!el) return;
+  el.textContent = text;
+  el.className = 'pill ' + (mode || '');
+}
+
+function callAPI(params, cb) {
+  if (!canUseRemote()) {
+    if (cb) cb(new Error('demo local'));
+    return;
+  }
+  setSync('Sincronizando', 'pending');
+  params.family = ACCESS.family;
+  params.token = ACCESS.token;
+  params.callback = 'dc_cb_' + Date.now() + '_' + Math.floor(Math.random() * 10000);
+  var callbackName = params.callback;
+  var timeout = setTimeout(function() {
+    cleanup();
+    setSync('Sin conexion', 'pending');
+    if (cb) cb(new Error('timeout'));
+  }, 15000);
+  function cleanup() {
+    clearTimeout(timeout);
+    try { delete window[callbackName]; } catch (e) { window[callbackName] = undefined; }
+    if (script.parentNode) script.parentNode.removeChild(script);
+  }
+  window[callbackName] = function(data) {
+    cleanup();
+    if (data && data.error) {
+      setSync('Error', 'pending');
+      if (cb) cb(new Error(data.error), data);
+      return;
+    }
+    setSync('Sincronizado', 'mama');
+    if (cb) cb(null, data);
+  };
+  var qs = [];
+  for (var k in params) {
+    if (params.hasOwnProperty(k)) qs.push(encodeURIComponent(k) + '=' + encodeURIComponent(params[k]));
+  }
+  var script = document.createElement('script');
+  script.src = API_URL + '?' + qs.join('&');
+  script.onerror = function() {
+    cleanup();
+    setSync('Sin conexion', 'pending');
+    if (cb) cb(new Error('network'));
+  };
+  document.head.appendChild(script);
+}
+
+function loadRemoteState() {
+  if (!canUseRemote()) {
+    setSync('Demo local', 'pending');
+    renderAll();
+    return;
+  }
+  callAPI({ action: 'getState' }, function(err, data) {
+    if (!err && data && data.state) {
+      state = normalizeState(data.state);
+      saveState();
+    }
+    renderAll();
+  });
+}
+
+function normalizeState(remote) {
+  return {
+    family: remote.family || state.family,
+    overrides: remote.overrides || {},
+    requests: remote.requests || [],
+    history: remote.history || []
+  };
+}
+
+function pad2(n) { return n < 10 ? '0' + n : '' + n; }
+function dateKey(d) { return d.getFullYear() + '-' + pad2(d.getMonth() + 1) + '-' + pad2(d.getDate()); }
+function labelOwner(who) {
+  if (who === 'papa') return (state.family && state.family.papaName) || 'Papa';
+  return (state.family && state.family.mamaName) || 'Mama';
+}
+function ownerClass(who) { return who === 'papa' ? 'papa' : 'mama'; }
+function ownerTextClass(who) { return who === 'papa' ? 'owner-papa' : 'owner-mama'; }
+
+function getBaseOwner(ds) {
+  var cycleStart = getCycleStartTime();
+  var cycle = getCycle();
+  var parts = ds.split('-');
+  var d = new Date(+parts[0], +parts[1] - 1, +parts[2]);
+  var diff = Math.round((d.getTime() - cycleStart) / 86400000);
+  if (diff < 0) return null;
+  return cycle[((diff % cycle.length) + cycle.length) % cycle.length];
+}
+
+function getCycleStartTime() {
+  var raw = state.family && state.family.cycleStart;
+  if (!raw) return CYCLE_START;
+  var parts = String(raw).split('-');
+  if (parts.length !== 3) return CYCLE_START;
+  return new Date(+parts[0], +parts[1] - 1, +parts[2]).getTime();
+}
+
+function getCycle() {
+  var cycle = state.family && state.family.cycle;
+  return Array.isArray(cycle) && cycle.length ? cycle : CYCLE;
+}
+
+function getOwner(ds) {
+  return state.overrides[ds] || getBaseOwner(ds);
+}
+
+function hasPending(ds) {
+  return state.requests.some(function(r) { return r.date === ds && r.status === 'pending'; });
+}
+
+function nextDifferentOwner(fromDate) {
+  var base = getOwner(dateKey(fromDate));
+  var d = new Date(fromDate.getTime());
+  for (var i = 1; i < 90; i++) {
+    d.setDate(d.getDate() + 1);
+    var who = getOwner(dateKey(d));
+    if (who && who !== base) return { date: new Date(d.getTime()), owner: who, days: i };
+  }
+  return null;
+}
+
+function renderSummary() {
+  var familyLabel = document.getElementById('familyName');
+  if (familyLabel) familyLabel.textContent = (state.family && state.family.name) || 'Acuerdos visuales para padres separados';
+  var today = new Date();
+  var todayK = dateKey(today);
+  var tomorrow = new Date(today.getTime());
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  var todayOwner = getOwner(todayK);
+  var pendingToday = hasPending(todayK);
+  var next = nextDifferentOwner(today);
+  var pending = state.requests.filter(function(r) { return r.status === 'pending'; });
+
+  document.getElementById('todayOwner').textContent = todayOwner ? labelOwner(todayOwner) : 'Sin datos';
+  document.getElementById('todayOwner').className = todayOwner ? ownerTextClass(todayOwner) : '';
+  var pill = document.getElementById('todayPill');
+  pill.textContent = pendingToday ? 'Pendiente' : 'Confirmado';
+  pill.className = 'pill ' + (pendingToday ? 'pending' : ownerClass(todayOwner));
+  document.getElementById('tomorrowOwner').textContent = labelOwner(getOwner(dateKey(tomorrow)));
+  document.getElementById('pendingCount').textContent = pending.length + (pending.length === 1 ? ' cambio' : ' cambios');
+
+  if (next) {
+    document.getElementById('nextLine').textContent = 'Proximo cambio: ' + DAYS[next.date.getDay()] + ' ' + next.date.getDate() + ' con ' + labelOwner(next.owner) + '.';
+    document.getElementById('nextChange').textContent = next.days === 1 ? 'Manana' : 'En ' + next.days + ' dias';
+  } else {
+    document.getElementById('nextLine').textContent = 'No hay cambios proximos cargados.';
+    document.getElementById('nextChange').textContent = 'Sin datos';
+  }
+}
+
+function renderCalendar() {
+  document.getElementById('monthTitle').textContent = MONTHS[calMonth] + ' ' + calYear;
+  var first = new Date(calYear, calMonth, 1);
+  var offset = first.getDay() === 0 ? 6 : first.getDay() - 1;
+  var total = new Date(calYear, calMonth + 1, 0).getDate();
+  var cells = [];
+  for (var i = 0; i < offset; i++) cells.push(null);
+  for (var d = 1; d <= total; d++) cells.push(d);
+  while (cells.length % 7 !== 0) cells.push(null);
+
+  var todayK = dateKey(new Date());
+  var html = '';
+  for (var r = 0; r < cells.length; r += 7) {
+    html += '<div class="week">';
+    for (var c = 0; c < 7; c++) {
+      var day = cells[r + c];
+      if (!day) {
+        html += '<div class="day empty"></div>';
+        continue;
+      }
+      var ds = calYear + '-' + pad2(calMonth + 1) + '-' + pad2(day);
+      var who = getOwner(ds);
+      var pending = hasPending(ds);
+      html += '<button class="day ' + (ds === todayK ? 'today ' : '') + '" onclick="prefillChange(\'' + ds + '\')">';
+      html += '<span class="date-num">' + day + '</span>';
+      html += '<span class="owner-chip ' + (pending ? 'pending' : ownerClass(who)) + '">' + (pending ? 'Pend.' : labelOwner(who)) + '</span>';
+      html += '</button>';
+    }
+    html += '</div>';
+  }
+  document.getElementById('calendarBody').innerHTML = html;
+}
+
+function renderRequests() {
+  var pending = state.requests.filter(function(r) { return r.status === 'pending'; });
+  var list = document.getElementById('pendingList');
+  if (!pending.length) {
+    list.innerHTML = '<div class="empty">No hay cambios pendientes. La semana esta clara.</div>';
+    return;
+  }
+  list.innerHTML = pending.map(function(r) {
+    return '<div class="change-row">' +
+      '<strong>' + formatDate(r.date) + ' quedaria con ' + labelOwner(r.owner) + '</strong>' +
+      '<span>' + (r.note || 'Sin nota adicional') + '</span>' +
+      '<div class="change-actions">' +
+        '<button class="secondary-btn" onclick="rejectRequest(\'' + r.id + '\')">Rechazar</button>' +
+        '<button class="primary-btn" onclick="acceptRequest(\'' + r.id + '\')">Aceptar</button>' +
+      '</div>' +
+    '</div>';
+  }).join('');
+}
+
+function renderHistory() {
+  var list = document.getElementById('historyList');
+  if (!state.history.length) {
+    list.innerHTML = '<div class="empty">Todavia no hay acuerdos registrados.</div>';
+    return;
+  }
+  list.innerHTML = state.history.slice(-6).reverse().map(function(h) {
+    return '<div class="change-row">' +
+      '<strong>' + h.action + ': ' + formatDate(h.date) + '</strong>' +
+      '<span>' + h.detail + '</span>' +
+    '</div>';
+  }).join('');
+}
+
+function renderAll() {
+  renderSummary();
+  renderCalendar();
+  renderRequests();
+  renderHistory();
+}
+
+function moveMonth(delta) {
+  calMonth += delta;
+  if (calMonth < 0) { calMonth = 11; calYear--; }
+  if (calMonth > 11) { calMonth = 0; calYear++; }
+  renderCalendar();
+}
+
+function openChangeModal() {
+  document.getElementById('changeDate').value = dateKey(new Date());
+  document.getElementById('changeOwner').value = 'papa';
+  document.getElementById('changeNote').value = '';
+  document.getElementById('changeModal').className = 'modal open';
+}
+
+function closeChangeModal() {
+  document.getElementById('changeModal').className = 'modal';
+}
+
+function prefillChange(ds) {
+  document.getElementById('changeDate').value = ds;
+  document.getElementById('changeOwner').value = getOwner(ds) === 'papa' ? 'mama' : 'papa';
+  document.getElementById('changeNote').value = '';
+  document.getElementById('changeModal').className = 'modal open';
+}
+
+function createChange(event) {
+  event.preventDefault();
+  var date = document.getElementById('changeDate').value;
+  var owner = document.getElementById('changeOwner').value;
+  var note = document.getElementById('changeNote').value.trim();
+  if (canUseRemote()) {
+    callAPI({ action: 'createChangeRequest', date: date, owner: owner, note: note }, function(err, data) {
+      if (!err && data && data.state) {
+        state = normalizeState(data.state);
+        saveState();
+      }
+      closeChangeModal();
+      renderAll();
+    });
+    return;
+  }
+  state.requests.push({
+    id: 'r' + Date.now(),
+    date: date,
+    owner: owner,
+    note: note,
+    status: 'pending',
+    createdAt: new Date().toISOString()
+  });
+  saveState();
+  closeChangeModal();
+  renderAll();
+}
+
+function acceptRequest(id) {
+  if (canUseRemote()) {
+    callAPI({ action: 'acceptChangeRequest', requestId: id }, function(err, data) {
+      if (!err && data && data.state) {
+        state = normalizeState(data.state);
+        saveState();
+        renderAll();
+      }
+    });
+    return;
+  }
+  var req = state.requests.find(function(r) { return r.id === id; });
+  if (!req) return;
+  req.status = 'accepted';
+  state.overrides[req.date] = req.owner;
+  state.history.push({
+    action: 'Aceptado',
+    date: req.date,
+    detail: 'El dia queda con ' + labelOwner(req.owner) + (req.note ? '. Nota: ' + req.note : '.')
+  });
+  saveState();
+  renderAll();
+}
+
+function rejectRequest(id) {
+  if (canUseRemote()) {
+    callAPI({ action: 'rejectChangeRequest', requestId: id }, function(err, data) {
+      if (!err && data && data.state) {
+        state = normalizeState(data.state);
+        saveState();
+        renderAll();
+      }
+    });
+    return;
+  }
+  var req = state.requests.find(function(r) { return r.id === id; });
+  if (!req) return;
+  req.status = 'rejected';
+  state.history.push({
+    action: 'Rechazado',
+    date: req.date,
+    detail: 'La propuesta no modifico el calendario' + (req.note ? '. Nota: ' + req.note : '.')
+  });
+  saveState();
+  renderAll();
+}
+
+function formatDate(ds) {
+  var parts = ds.split('-');
+  var d = new Date(+parts[0], +parts[1] - 1, +parts[2]);
+  return DAYS[d.getDay()] + ' ' + d.getDate() + ' de ' + MONTHS[d.getMonth()];
+}
+
+loadRemoteState();
+</script>
+</body>
+</html>
