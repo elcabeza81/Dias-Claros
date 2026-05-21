@@ -48,7 +48,7 @@ button { cursor: pointer; }
 }
 
 .topbar {
-  min-height: 74px;
+  min-height: 82px;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -62,7 +62,7 @@ button { cursor: pointer; }
 .brand strong {
   display: block;
   color: var(--gold);
-  font-size: 28px;
+  font-size: 26px;
   font-weight: 900;
   line-height: 1;
 }
@@ -74,6 +74,35 @@ button { cursor: pointer; }
   letter-spacing: .08em;
   margin-top: 5px;
   text-transform: uppercase;
+}
+
+.header-status {
+  flex: 1;
+  min-width: 0;
+  text-align: center;
+}
+
+.header-status .label {
+  margin-bottom: 2px;
+}
+
+.status-main {
+  font-size: clamp(28px, 3vw, 42px);
+  font-weight: 950;
+  line-height: 1;
+}
+
+.status-next {
+  color: var(--text);
+  font-size: clamp(14px, 1.15vw, 18px);
+  font-weight: 850;
+  line-height: 1.25;
+  margin-top: 5px;
+}
+
+.status-next em {
+  color: var(--gold);
+  font-style: normal;
 }
 
 .actions {
@@ -120,26 +149,6 @@ button { cursor: pointer; }
   padding: 0 14px;
 }
 
-.summary {
-  margin-bottom: 10px;
-  display: flex;
-  justify-content: center;
-}
-
-.today-card {
-  background: var(--panel);
-  border: 1px solid var(--line);
-  border-radius: 14px;
-  padding: 16px;
-}
-
-.today-card {
-  width: min(100%, 920px);
-  min-height: 104px;
-  padding: 14px 16px;
-  text-align: center;
-}
-
 .label {
   color: var(--muted);
   font-size: 11px;
@@ -149,28 +158,8 @@ button { cursor: pointer; }
   text-transform: uppercase;
 }
 
-.today-owner {
-  font-size: clamp(32px, 3.2vw, 46px);
-  font-weight: 950;
-  line-height: .95;
-  margin-bottom: 12px;
-}
-
 .owner-papa { color: var(--papa); }
 .owner-mama { color: var(--mama); }
-
-.next-line {
-  color: var(--text);
-  font-size: clamp(17px, 1.45vw, 22px);
-  font-weight: 800;
-  line-height: 1.35;
-  margin: 0 0 3px;
-}
-
-.next-line em {
-  color: var(--gold);
-  font-style: normal;
-}
 
 .change-line {
   color: var(--muted);
@@ -224,11 +213,10 @@ button { cursor: pointer; }
 }
 
 @media (min-width: 761px) {
-  .summary { flex: 0 0 auto; }
   .calendar-shell {
     --calendar-rows: 5;
     flex: 0 0 auto;
-    width: min(920px, 100%, calc((100vh - 360px) * 7 / var(--calendar-rows)));
+    width: min(920px, 100%, calc((100vh - 190px) * 7 / var(--calendar-rows)));
   }
 }
 
@@ -516,18 +504,21 @@ button { cursor: pointer; }
   .app { padding: 0 10px 18px; }
   .topbar {
     align-items: flex-start;
+    flex-wrap: wrap;
     margin-left: -10px;
     margin-right: -10px;
   }
   .brand strong { font-size: 26px; }
   .brand span { font-size: 11px; line-height: 1.25; }
+  .header-status {
+    order: 3;
+    flex: 1 1 100%;
+    text-align: left;
+  }
+  .status-main { font-size: 34px; }
+  .status-next { font-size: 15px; }
   .actions { gap: 8px; }
   .primary-btn { padding: 0 12px; }
-  .summary { grid-template-columns: 1fr; }
-  .today-card {
-    width: 100%;
-  }
-  .next-line { margin-top: 0; }
   .calendar-head {
     grid-template-columns: 52px 1fr 52px;
     padding: 10px;
@@ -549,6 +540,7 @@ button { cursor: pointer; }
 
 @media (max-width: 390px) {
   .topbar { flex-direction: column; }
+  .header-status { order: 0; text-align: left; }
   .actions { width: 100%; justify-content: space-between; }
   .primary-btn { flex: 1; }
   .day { min-height: 68px; }
@@ -563,24 +555,17 @@ button { cursor: pointer; }
       <strong>Dias Claros</strong>
       <span id="familyName">Acuerdos visuales para padres separados</span>
     </div>
+    <div class="header-status">
+      <div class="label">Hoy están con</div>
+      <div id="todayOwner" class="status-main">...</div>
+      <div id="nextLine" class="status-next"></div>
+      <div id="changeLine" class="change-line"></div>
+    </div>
     <div class="actions">
       <span id="syncDot" class="sync-dot local" title="Estado de sincronizacion"></span>
       <button class="primary-btn" onclick="openChangeModal()">Cambiar día</button>
     </div>
   </header>
-
-  <section class="summary">
-    <div class="today-card">
-      <div>
-        <div class="label">Hoy están con</div>
-        <div id="todayOwner" class="today-owner">...</div>
-      </div>
-      <div>
-        <div id="nextLine" class="next-line"></div>
-        <div id="changeLine" class="change-line"></div>
-      </div>
-    </div>
-  </section>
 
   <section class="calendar-shell">
     <div class="calendar-head">
@@ -872,7 +857,7 @@ function renderSummary() {
   var who = getOwner(dateKey(today));
   var owner = document.getElementById('todayOwner');
   owner.textContent = who ? labelOwner(who) : 'Sin datos';
-  owner.className = 'today-owner ' + (who ? ownerTextClass(who) : '');
+  owner.className = 'status-main ' + (who ? ownerTextClass(who) : '');
 
   var next = nextDifferentOwner(today);
   var line = document.getElementById('nextLine');
