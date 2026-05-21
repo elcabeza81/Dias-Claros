@@ -48,7 +48,7 @@ button { cursor: pointer; }
 }
 
 .topbar {
-  min-height: 82px;
+  min-height: 74px;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -62,7 +62,7 @@ button { cursor: pointer; }
 .brand strong {
   display: block;
   color: var(--gold);
-  font-size: 30px;
+  font-size: 28px;
   font-weight: 900;
   line-height: 1;
 }
@@ -72,7 +72,7 @@ button { cursor: pointer; }
   color: var(--muted);
   font-size: 12px;
   letter-spacing: .08em;
-  margin-top: 7px;
+  margin-top: 5px;
   text-transform: uppercase;
 }
 
@@ -135,7 +135,9 @@ button { cursor: pointer; }
 
 .today-card {
   width: min(100%, 920px);
-  min-height: 112px;
+  min-height: 104px;
+  padding: 14px 16px;
+  text-align: center;
 }
 
 .label {
@@ -148,7 +150,7 @@ button { cursor: pointer; }
 }
 
 .today-owner {
-  font-size: clamp(34px, 3.6vw, 50px);
+  font-size: clamp(32px, 3.2vw, 46px);
   font-weight: 950;
   line-height: .95;
   margin-bottom: 12px;
@@ -224,7 +226,9 @@ button { cursor: pointer; }
 @media (min-width: 761px) {
   .summary { flex: 0 0 auto; }
   .calendar-shell {
+    --calendar-rows: 5;
     flex: 0 0 auto;
+    width: min(920px, 100%, calc((100vh - 360px) * 7 / var(--calendar-rows)));
   }
 }
 
@@ -233,7 +237,7 @@ button { cursor: pointer; }
   grid-template-columns: 66px 1fr 66px;
   align-items: center;
   gap: 12px;
-  padding: 12px 14px;
+  padding: 10px 14px;
   flex: 0 0 auto;
 }
 
@@ -246,6 +250,7 @@ button { cursor: pointer; }
 
 .icon-btn {
   width: 66px;
+  min-height: 40px;
   border: 1px solid var(--line);
   background: #111820;
   color: var(--text);
@@ -282,7 +287,7 @@ button { cursor: pointer; }
 }
 
 .days div {
-  padding: 10px 4px;
+  padding: 8px 4px;
 }
 
 .week {
@@ -901,6 +906,9 @@ function renderCalendar() {
   while (cells.length % 7 !== 0) cells.push(null);
 
   var todayK = dateKey(new Date());
+  var rowsCount = cells.length / 7;
+  var shell = document.querySelector('.calendar-shell');
+  if (shell) shell.style.setProperty('--calendar-rows', rowsCount);
   var html = '';
   for (var r = 0; r < cells.length; r += 7) {
     html += '<div class="week">';
